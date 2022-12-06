@@ -3,15 +3,31 @@
 
 #include QMK_KEYBOARD_H
 
+enum custom_keycodes {
+    // used for vim movements
+    WORD_FORWARDS = SAFE_RANGE,
+    WORD_BACKWARDS
+};
+
+// Used for simulating the vim motions
+enum OS {
+    MAC,
+    LINUX,
+    WIN
+};
+enum OS currentOS = MAC;
+
 // Put base layers before function layers
 enum layers{
   BASE,
+  MOUSE_THUMB,
   GAMING,
   GAMING_SHIFTED,
   NUMBERS,
   LEFT_MODS,
   RIGHT_MODS,
-  VIM
+  VIM,
+  MOUSE
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -33,7 +49,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         CAPS_WORD, KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                               KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC,
         KC_ESC,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                               KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT,
         KC_GRAVE,  KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                               KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RBRC,
-                            SH_TG, LT(LEFT_MODS, KC_SPC), LT(NUMBERS, KC_TAB),   LT(NUMBERS, KC_BSPC), LT(RIGHT_MODS, KC_ENT), LT(VIM, KC_DEL)
+                            SH_TT, LT(LEFT_MODS, KC_SPC), LT(NUMBERS, KC_TAB),   LT(NUMBERS, KC_BSPC), LT(RIGHT_MODS, KC_ENT), LT(VIM, KC_DEL)
+    ),
+    [MOUSE_THUMB] = LAYOUT_split_3x6_3(
+        _______, _______,  _______, _______, _______, _______,                                _______, _______, _______, _______, _______, _______,
+        _______, _______,  _______, _______, _______, _______,                                _______, _______, _______, _______, _______, _______,
+        _______, _______,  _______, _______, _______, _______,                                _______, _______, _______, _______, _______, _______,
+                                           MO(MOUSE), _______, _______,                     _______, _______, _______
     ),
     [GAMING] = LAYOUT_split_3x6_3(
         KC_CAPS, _______,  _______, _______, _______, _______,                                _______, _______, _______, _______, _______, _______,
@@ -66,11 +88,17 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                                       _______, _______, _______,          _______, _______, _______
     ),
     [VIM] = LAYOUT_split_3x6_3(
-        _______,  _______,  _______,  _______,  _______,  _______,                             _______, _______, _______, _______, _______, _______,
-        _______,  _______,  _______,  _______,  _______,  _______,                             KC_LEFT, KC_DOWN, KC_UP, KC_RIGHT, _______, _______,
-        _______,  _______,  _______,  _______,  _______,  _______,                             _______, _______, _______, _______, _______, _______,
+        _______,  _______,  WORD_FORWARDS,  _______,  _______,  _______,                             _______, _______, _______, _______, _______, _______,
+        _______,  _______,  _______,        _______,  _______,  _______,                             KC_LEFT, KC_DOWN, KC_UP, KC_RIGHT, _______, _______,
+        _______,  _______,  _______,  _______, _______,  WORD_BACKWARDS,                             _______, _______, _______, _______, _______, _______,
                                                       _______, _______, _______,          _______, _______, _______
-    )
+    ),
+    [MOUSE] = LAYOUT_split_3x6_3(
+        _______,  _______,  _______,  _______,  _______,  _______,                             _______, KC_WH_U, _______, _______, _______, _______,
+        _______,  _______,  _______,  KC_WH_D,  _______,  _______,                             KC_MS_L, KC_MS_D, KC_MS_U, KC_MS_R, _______, _______,
+        _______,  _______,  _______,  _______,  _______,  _______,                             _______, KC_BTN1, KC_BTN2, KC_BTN3, _______, _______,
+                                                      _______, _______, _______,          _______, _______, _______
+    ),
 };
 const keypos_t PROGMEM hand_swap_config[MATRIX_ROWS][MATRIX_COLS] = {
   {{5, 4}, {4, 4}, {3, 4}, {2, 4}, {1, 4}, {0, 4}},
@@ -90,6 +118,7 @@ void matrix_scan_user(void) {
     leading = false;
     leader_end();
 
+    // Different base layers(They aren't base layers in the qmk sense but are used like so)
     SEQ_FOUR_KEYS(KC_B, KC_A, KC_S, KC_E) {
       layer_clear();
     }
@@ -99,5 +128,43 @@ void matrix_scan_user(void) {
     SEQ_FIVE_KEYS(KC_G, KC_A, KC_M, KC_E, KC_S) {
       layer_move(GAMING_SHIFTED);
     }
+    SEQ_FIVE_KEYS(KC_M, KC_O, KC_U, KC_S, KC_E) {
+      layer_move(MOUSE_THUMB);
+    }
+    // for setting the OS
+    SEQ_FIVE_KEYS(KC_L, KC_I, KC_N, KC_U, KC_X) {
+        currentOS = LINUX;
+    }
+    SEQ_THREE_KEYS(KC_W, KC_I, KC_N) {
+        currentOS = WIN;
+    }
+    SEQ_THREE_KEYS(KC_M, KC_A, KC_C) {
+        currentOS = MAC;
+    }
   }
-}
+};
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case WORD_BACKWARDS:
+            if (record->event.pressed) {
+                // when keycode is pressed
+                if(currentOS == MAC) {
+                    SEND_STRING(SS_DOWN(X_LALT) SS_TAP(X_LEFT) SS_UP(X_LALT));
+                } else {
+                    SEND_STRING(SS_DOWN(X_LCTRL) SS_TAP(X_LEFT) SS_UP(X_LCTRL));
+                }
+            }
+            break;
+        case WORD_FORWARDS:
+            if(record->event.pressed) {
+                // when keycode is pressed
+                if(currentOS == MAC) {
+                    SEND_STRING(SS_DOWN(X_LALT) SS_TAP(X_RIGHT) SS_UP(X_LALT));
+                } else {
+                    SEND_STRING(SS_DOWN(X_LCTRL) SS_TAP(X_RIGHT) SS_UP(X_LCTRL));
+                }
+            }
+    }
+    return true;
+};
