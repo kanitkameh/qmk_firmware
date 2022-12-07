@@ -10,9 +10,10 @@ enum custom_keycodes {
     VISUAL,
     YANK,
     CUT,
-    PASTE
+    PASTE,
+    UNDO
 };
-
+// Non-QMK built ins start
 // Used for simulating the vim motions
 enum OS {
     MAC,
@@ -20,9 +21,20 @@ enum OS {
     WIN
 };
 
+// don't access directly, use vim functions activateVisualMode/deactivateVisualMode
 bool isVisualModeActive = false;
 
 enum OS currentOS = MAC;
+// Non-QMK built ins end
+// vim functions
+void activateVisualMode(void){
+    isVisualModeActive = true;
+    SEND_STRING(SS_DOWN(X_LSFT));
+}
+void deactivateVisualMode(void){
+    isVisualModeActive = false;
+    SEND_STRING(SS_UP(X_LSFT));
+}
 
 // Put base layers before function layers
 enum layers{
@@ -95,7 +107,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                                       _______, _______, _______,          _______, _______, _______
     ),
     [VIM] = LAYOUT_split_3x6_3(
-        _______,  _______,  WORD_FORWARDS,  WORD_FORWARDS,  _______,  _______,                             YANK,     _______, _______, _______, PASTE, _______,
+        _______,  _______,  WORD_FORWARDS,  WORD_FORWARDS,  _______,  _______,                   YANK,    UNDO,    _______, _______, PASTE, _______,
         _______,  _______,  _______,        CUT,  _______,  _______,                             KC_LEFT, KC_DOWN, KC_UP, KC_RIGHT, _______, _______,
         _______,  _______,  CUT,  _______, VISUAL,  WORD_BACKWARDS,                             _______, _______, _______, _______, _______, _______,
                                                       _______, _______, _______,          _______, _______, _______
@@ -151,10 +163,22 @@ void matrix_scan_user(void) {
   }
 };
 
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
+        case UNDO:
+            if (record->event.pressed) {
+                // when keycode is pressed
+                if(currentOS == MAC) {
+                    SEND_STRING(SS_LCMD("z"));
+                } else {
+                    SEND_STRING(SS_LCTL("z"));
+                }
+            }
+            break;
         case CUT:
             if (record->event.pressed) {
+                deactivateVisualMode();
                 // when keycode is pressed
                 if(currentOS == MAC) {
                     SEND_STRING(SS_LCMD("x"));
@@ -162,8 +186,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     SEND_STRING(SS_LCTL("x"));
                 }
             }
+            break;
         case PASTE:
             if (record->event.pressed) {
+                deactivateVisualMode();
                 // when keycode is pressed
                 if(currentOS == MAC) {
                     SEND_STRING(SS_LCMD("v"));
@@ -171,8 +197,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     SEND_STRING(SS_LCTL("v"));
                 }
             }
+            break;
         case YANK:
             if (record->event.pressed) {
+                deactivateVisualMode();
                 // when keycode is pressed
                 if(currentOS == MAC) {
                     SEND_STRING(SS_LCMD("c"));
@@ -180,15 +208,15 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     SEND_STRING(SS_LCTL("c"));
                 }
             }
+            break;
         case VISUAL:
             if (record->event.pressed) {
                 // when keycode is pressed
                 // toggle visual mode
-                isVisualModeActive = !isVisualModeActive;
                 if(isVisualModeActive){
-                    SEND_STRING(SS_DOWN(X_LSFT));
+                    deactivateVisualMode();
                 } else {
-                    SEND_STRING(SS_UP(X_LSFT));
+                    activateVisualMode();
                 }
             }
             break;
@@ -211,6 +239,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     SEND_STRING(SS_DOWN(X_LCTRL) SS_TAP(X_RIGHT) SS_UP(X_LCTRL));
                 }
             }
+            break;
     }
     return true;
 };
+
+layer_state_t layer_state_set_user(layer_state_t state) {
+    deactivateVisualMode();
+    return state;
+}
