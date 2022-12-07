@@ -6,7 +6,11 @@
 enum custom_keycodes {
     // used for vim movements
     WORD_FORWARDS = SAFE_RANGE,
-    WORD_BACKWARDS
+    WORD_BACKWARDS,
+    VISUAL,
+    YANK,
+    CUT,
+    PASTE
 };
 
 // Used for simulating the vim motions
@@ -15,6 +19,9 @@ enum OS {
     LINUX,
     WIN
 };
+
+bool isVisualModeActive = false;
+
 enum OS currentOS = MAC;
 
 // Put base layers before function layers
@@ -88,9 +95,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                                       _______, _______, _______,          _______, _______, _______
     ),
     [VIM] = LAYOUT_split_3x6_3(
-        _______,  _______,  WORD_FORWARDS,  _______,  _______,  _______,                             _______, _______, _______, _______, _______, _______,
-        _______,  _______,  _______,        _______,  _______,  _______,                             KC_LEFT, KC_DOWN, KC_UP, KC_RIGHT, _______, _______,
-        _______,  _______,  _______,  _______, _______,  WORD_BACKWARDS,                             _______, _______, _______, _______, _______, _______,
+        _______,  _______,  WORD_FORWARDS,  WORD_FORWARDS,  _______,  _______,                             YANK,     _______, _______, _______, PASTE, _______,
+        _______,  _______,  _______,        CUT,  _______,  _______,                             KC_LEFT, KC_DOWN, KC_UP, KC_RIGHT, _______, _______,
+        _______,  _______,  CUT,  _______, VISUAL,  WORD_BACKWARDS,                             _______, _______, _______, _______, _______, _______,
                                                       _______, _______, _______,          _______, _______, _______
     ),
     [MOUSE] = LAYOUT_split_3x6_3(
@@ -146,6 +153,45 @@ void matrix_scan_user(void) {
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
+        case CUT:
+            if (record->event.pressed) {
+                // when keycode is pressed
+                if(currentOS == MAC) {
+                    SEND_STRING(SS_LCMD("x"));
+                } else {
+                    SEND_STRING(SS_LCTL("x"));
+                }
+            }
+        case PASTE:
+            if (record->event.pressed) {
+                // when keycode is pressed
+                if(currentOS == MAC) {
+                    SEND_STRING(SS_LCMD("v"));
+                } else {
+                    SEND_STRING(SS_LCTL("v"));
+                }
+            }
+        case YANK:
+            if (record->event.pressed) {
+                // when keycode is pressed
+                if(currentOS == MAC) {
+                    SEND_STRING(SS_LCMD("c"));
+                } else {
+                    SEND_STRING(SS_LCTL("c"));
+                }
+            }
+        case VISUAL:
+            if (record->event.pressed) {
+                // when keycode is pressed
+                // toggle visual mode
+                isVisualModeActive = !isVisualModeActive;
+                if(isVisualModeActive){
+                    SEND_STRING(SS_DOWN(X_LSFT));
+                } else {
+                    SEND_STRING(SS_UP(X_LSFT));
+                }
+            }
+            break;
         case WORD_BACKWARDS:
             if (record->event.pressed) {
                 // when keycode is pressed
