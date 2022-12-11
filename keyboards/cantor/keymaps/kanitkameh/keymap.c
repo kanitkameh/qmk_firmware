@@ -28,12 +28,16 @@ enum OS currentOS = MAC;
 // Non-QMK built ins end
 // vim functions
 void activateVisualMode(void){
-    isVisualModeActive = true;
-    SEND_STRING(SS_DOWN(X_LSFT));
+    if(!isVisualModeActive){
+        isVisualModeActive = true;
+        SEND_STRING(SS_DOWN(X_LSFT));
+    }
 }
 void deactivateVisualMode(void){
-    isVisualModeActive = false;
-    SEND_STRING(SS_UP(X_LSFT));
+    if(isVisualModeActive){
+        isVisualModeActive = false;
+        SEND_STRING(SS_UP(X_LSFT));
+    }
 }
 
 // Put base layers before function layers
