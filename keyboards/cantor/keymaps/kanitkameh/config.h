@@ -9,3 +9,5 @@
 #define LEADER_NO_TIMEOUT
 // Allows you to use LT(3, KC_A) instead of KC_A thus more flexible
 #define LEADER_KEY_STRICT_KEY_PROCESSING
+// n key rollover may not be turned on by default
+#define FORCE_NKRO
