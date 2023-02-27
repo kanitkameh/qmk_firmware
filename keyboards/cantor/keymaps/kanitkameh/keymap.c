@@ -89,7 +89,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [GAMING_SHIFTED] = LAYOUT_split_3x6_3(
         KC_CAPS,  KC_TAB,    KC_Q,    KC_W,    KC_E,    KC_R,                                   _______, _______, _______, _______, _______, _______,
         _______,  KC_LSFT,   KC_A,    KC_S,    KC_D,    KC_F,                                   _______, _______, _______, _______, _______, _______,
-        _______,  KC_LCTRL,  KC_Z,    KC_X,    KC_C,    KC_V,                                   _______, _______, _______, _______, _______, _______,
+        _______,  KC_LCTL,  KC_Z,    KC_X,    KC_C,    KC_V,                                   _______, _______, _______, _______, _______, _______,
                                 _______, KC_SPC, LT(NUMBERS, KC_LALT),                      _______, _______, _______
     ),
     [NUMBERS] = LAYOUT_split_3x6_3(
@@ -100,13 +100,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
     [LEFT_MODS] = LAYOUT_split_3x6_3(
         _______,  _______,  _______,  _______,  _______,  _______,                             _______, _______, _______, _______, _______, _______,
-        _______,  KC_LCTRL, KC_LALT,  KC_LGUI,  KC_LSFT,  _______,                             _______, _______, _______, _______, _______, _______,
+        _______,  KC_LCTL, KC_LALT,  KC_LGUI,  KC_LSFT,  _______,                             _______, _______, _______, _______, _______, _______,
         _______,  _______,  _______,  _______,  _______,  _______,                             _______, _______, _______, _______, _______, _______,
                                                       _______, _______, _______,          _______, _______, _______
     ),
     [RIGHT_MODS] = LAYOUT_split_3x6_3(
         _______,  _______,  _______,  _______,  _______,  _______,                             _______, _______, _______, _______, _______, _______,
-        _______,  _______,  _______,  _______,  _______,  _______,                             KC_LEAD, KC_RSFT, KC_RGUI, KC_RALT, KC_RCTRL, _______,
+        _______,  _______,  _______,  _______,  _______,  _______,                             KC_LEAD, KC_RSFT, KC_RGUI, KC_RALT, KC_RCTL, _______,
         _______,  _______,  _______,  _______,  _______,  _______,                             _______, _______, _______, _______, _______, _______,
                                                       _______, _______, _______,          _______, _______, _______
     ),
@@ -230,7 +230,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 if(currentOS == MAC) {
                     SEND_STRING(SS_DOWN(X_LALT) SS_TAP(X_LEFT) SS_UP(X_LALT));
                 } else {
-                    SEND_STRING(SS_DOWN(X_LCTRL) SS_TAP(X_LEFT) SS_UP(X_LCTRL));
+                    SEND_STRING(SS_DOWN(X_LCTL) SS_TAP(X_LEFT) SS_UP(X_LCTL));
                 }
             }
             break;
@@ -240,7 +240,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 if(currentOS == MAC) {
                     SEND_STRING(SS_DOWN(X_LALT) SS_TAP(X_RIGHT) SS_UP(X_LALT));
                 } else {
-                    SEND_STRING(SS_DOWN(X_LCTRL) SS_TAP(X_RIGHT) SS_UP(X_LCTRL));
+                    SEND_STRING(SS_DOWN(X_LCTL) SS_TAP(X_RIGHT) SS_UP(X_LCTL));
                 }
             }
             break;
