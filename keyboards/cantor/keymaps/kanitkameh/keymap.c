@@ -69,7 +69,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       *                       └───┘   └───┘
       */
     [BASE] = LAYOUT_split_3x6_3(
-        CAPS_WORD, KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                               KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC,
+        CW_TOGG, KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                               KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC,
         KC_ESC,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                               KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT,
         KC_GRAVE,  KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                               KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RBRC,
                             SH_TT, LT(LEFT_MODS, KC_SPC), LT(NUMBERS, KC_TAB),   LT(NUMBERS, KC_BSPC), LT(RIGHT_MODS, KC_ENT), LT(VIM, KC_DEL)
@@ -95,7 +95,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [NUMBERS] = LAYOUT_split_3x6_3(
         KC_F12,  KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,                               KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,
         KC_EQL,  KC_1,     KC_2,     KC_3,     KC_4,     KC_5,                                KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MINUS,
-        _______, KC_GRAVE,  _______,  QK_LOCK,  KC_ESC,  KC_EQL,                              KC_MINUS, KC_QUOT, KC_BSLS, KC_LBRC, KC_RBRC, _______,
+        _______, KC_GRAVE,  CW_TOGG,  QK_LOCK,  KC_ESC,  KC_EQL,                              KC_MINUS, KC_QUOT, KC_BSLS, KC_LBRC, KC_RBRC, _______,
                                                  _______, _______, _______,          _______, _______, _______
     ),
     [LEFT_MODS] = LAYOUT_split_3x6_3(
@@ -106,7 +106,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
     [RIGHT_MODS] = LAYOUT_split_3x6_3(
         _______,  _______,  _______,  _______,  _______,  _______,                             _______, _______, _______, _______, _______, _______,
-        _______,  _______,  _______,  _______,  _______,  _______,                             KC_LEAD, KC_RSFT, KC_RGUI, KC_RALT, KC_RCTL, _______,
+        _______,  _______,  _______,  _______,  _______,  _______,                             QK_LEAD, KC_RSFT, KC_RGUI, KC_RALT, KC_RCTL, _______,
         _______,  _______,  _______,  _______,  _______,  _______,                             _______, _______, _______, _______, _______, _______,
                                                       _______, _______, _______,          _______, _______, _______
     ),
@@ -134,37 +134,31 @@ const keypos_t PROGMEM hand_swap_config[MATRIX_ROWS][MATRIX_COLS] = {
   {{2, 3}, {1, 3}, {2, 7}, {5, 3}, {4, 3}, {3, 3}},
 };
 
-LEADER_EXTERNS();
 
-void matrix_scan_user(void) {
-  LEADER_DICTIONARY() {
-    leading = false;
-    leader_end();
-
+void leader_end_user(void) {
     // Different base layers(They aren't base layers in the qmk sense but are used like so)
-    SEQ_FOUR_KEYS(KC_B, KC_A, KC_S, KC_E) {
-      layer_clear();
+    if (leader_sequence_four_keys(KC_B, KC_A, KC_S, KC_E)) {
+        layer_clear();
     }
-    SEQ_FOUR_KEYS(KC_G, KC_A, KC_M, KC_E) {
-      layer_move(GAMING);
+    if (leader_sequence_four_keys(KC_G, KC_A, KC_M, KC_E)) {
+        layer_move(GAMING);
     }
-    SEQ_FIVE_KEYS(KC_G, KC_A, KC_M, KC_E, KC_S) {
-      layer_move(GAMING_SHIFTED);
+    if (leader_sequence_five_keys(KC_G, KC_A, KC_M, KC_E, KC_S)) {
+        layer_move(GAMING_SHIFTED);
     }
-    SEQ_FIVE_KEYS(KC_M, KC_O, KC_U, KC_S, KC_E) {
-      layer_move(MOUSE_THUMB);
+    if (leader_sequence_five_keys(KC_M, KC_O, KC_U, KC_S, KC_E)) {
+        layer_move(MOUSE_THUMB);
     }
     // for setting the OS
-    SEQ_FIVE_KEYS(KC_L, KC_I, KC_N, KC_U, KC_X) {
+    if (leader_sequence_five_keys(KC_L, KC_I, KC_N, KC_U, KC_X)) {
         currentOS = LINUX;
     }
-    SEQ_THREE_KEYS(KC_W, KC_I, KC_N) {
+    if (leader_sequence_three_keys(KC_W, KC_I, KC_N)) {
         currentOS = WIN;
     }
-    SEQ_THREE_KEYS(KC_M, KC_A, KC_C) {
+    if (leader_sequence_three_keys(KC_M, KC_A, KC_C)) {
         currentOS = MAC;
     }
-  }
 };
 
 
