@@ -398,3 +398,9 @@ bool shutdown_kb(bool jump_to_bootloader) {
 #endif // RGB_MATRIX_ENABLE
     return true;
 }
+
+#ifdef OS_DETECTION_ENABLE
+bool process_detected_host_os_kb(os_variant_t detected_os) {
+    return process_detected_host_os_user(detected_os);
+}
+#endif // OS_DETECTION_ENABLE
